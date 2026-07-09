@@ -20,6 +20,13 @@ export class BoxCollider extends Collider {
         this.size = size || new THREE.Vector3(1, 1, 1);
         this.halfSize = this.size.clone().multiplyScalar(0.5);
     }
+
+    getBox(position) {
+        const box = new THREE.Box3();
+        box.min.copy(position).sub(this.halfSize);
+        box.max.copy(position).add(this.halfSize);
+        return box;
+    }
 }
 
 export class HeightfieldCollider extends Collider {

@@ -26,7 +26,7 @@ export class TouchControls {
         this.isBreaking = false; 
         this.isDrag = false;
         
-        this.holdThreshold = 250; // мс (быстрее реакция)
+        this.holdThreshold = 250;
         this.dragThreshold = 15;
 
         if (this.isMobile()) {

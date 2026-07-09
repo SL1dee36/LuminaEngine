@@ -2,6 +2,8 @@
 // author: Nazaryan A.K. 
 // github: @Sl1dee36
 
+import * as THREE from 'three';
+
 export class InputManager {
     constructor(targetElement) {
         this.keys = {};
@@ -11,6 +13,7 @@ export class InputManager {
         this.mouseDelta = { x: 0, y: 0 };
         this.scrollDelta = 0;
         this.lockElement = targetElement;
+        this.mousePos = new THREE.Vector2(0, 0);
         
         // Mobile
         this.joystickInput = { x: 0, y: 0 };
@@ -49,6 +52,11 @@ export class InputManager {
                     if (!this.isPaused) this.setPaused(true);
                 }
             }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            this.mousePos.x = (e.clientX / window.innerWidth) * 2 - 1;
+            this.mousePos.y = -(e.clientY / window.innerHeight) * 2 + 1;
         });
     }
 

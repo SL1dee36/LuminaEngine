@@ -5,13 +5,13 @@
 import * as THREE from 'three';
 import Renderer from './Renderer.js';
 import PhysicsEngine from '../physics/PhysicsEngine.js';
-import InputManager from './InputManager.js';
+import { InputManager } from './InputManager.js';
 
 export default class Engine {
     constructor(canvasId) {
         this.renderer = new Renderer(canvasId);
         this.physicsEngine = new PhysicsEngine();
-        this.inputManager = new InputManager();
+        this.inputManager = new InputManager(this.renderer.renderer.domElement);
         
         this.gameObjects = [];
         this.lastTime = performance.now();
@@ -19,6 +19,8 @@ export default class Engine {
     }
 
     addGameObject(gameObject) {
+        gameObject.engine = this;
+        
         this.gameObjects.push(gameObject);
         
         if (gameObject.mesh) {
@@ -28,13 +30,9 @@ export default class Engine {
         if (gameObject.rigidBody) {
             this.physicsEngine.addRigidBody(gameObject.rigidBody);
         }
-
-        if (gameObject.components) {
-            gameObject.components.forEach(comp => {
-                if (comp.start) comp.start();
-            });
-        }
+        gameObject.start();
     }
+
 
     removeGameObject(gameObject) {
         const index = this.gameObjects.indexOf(gameObject);
@@ -77,9 +75,9 @@ export default class Engine {
         const deltaTime = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
 
-        this.inputManager.update();
         this.physicsEngine.update(deltaTime);
         this.gameObjects.forEach(obj => obj.update(deltaTime));
         this.renderer.render();
+        this.inputManager.lateUpdate(); 
     }
 }
