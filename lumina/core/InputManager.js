@@ -21,7 +21,7 @@ export class InputManager {
         this.isSprintingMobile = false; 
 
         this.isPaused = false; 
-        this.isInventoryOpen = false;
+        this.isUIOpen = false;
 
         // Block Context Menu globally for Right-Click logic
         document.addEventListener('contextmenu', (e) => e.preventDefault(), false);
@@ -36,7 +36,7 @@ export class InputManager {
         document.addEventListener('click', (e) => {
             if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.closest('.menu-screen') || e.target.closest('#mobile-controls') || e.target.closest('.slot')) return;
             
-            if (!this.isPaused && !this.isInventoryOpen && document.pointerLockElement !== this.lockElement) {
+            if (!this.isPaused && !this.isUIOpen && document.pointerLockElement !== this.lockElement) {
                 this.lock();
             }
         });
@@ -48,7 +48,7 @@ export class InputManager {
                 document.addEventListener('mousemove', this.onMouseMove.bind(this), false);
             } else {
                 document.removeEventListener('mousemove', this.onMouseMove.bind(this), false);
-                if (!this.isInventoryOpen && !this.isMobile()) {
+                if (!this.isUIOpen && !this.isMobile()) {
                     if (!this.isPaused) this.setPaused(true);
                 }
             }
@@ -114,7 +114,7 @@ export class InputManager {
     onKeyDown(event) { this.keys[event.code] = true; }
 
     onMouseMove(event) {
-        if (this.isPaused || this.isInventoryOpen) return;
+        if (this.isPaused || this.isUIOpen) return;
         this.mouseDelta.x += event.movementX;
         this.mouseDelta.y += event.movementY;
     }
@@ -142,7 +142,7 @@ export class InputManager {
     getScrollDelta() { return this.scrollDelta; }
     
     isPointerLocked() { 
-        if (this.isMobile()) return !this.isPaused && !this.isInventoryOpen;
+        if (this.isMobile()) return !this.isPaused && !this.isUIOpen;
         return document.pointerLockElement === this.lockElement || document.pointerLockElement === document.body; 
     }
 
