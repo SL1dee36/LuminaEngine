@@ -1,3 +1,6 @@
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
+
 export class SettingsManager {
     constructor() {
         this.settings = {
@@ -14,7 +17,7 @@ export class SettingsManager {
             showClouds: true,
             showStars: true,
             showSunMoon: true,
-            ambientOcclusion: true // Новая настройка
+            ambientOcclusion: true
         };
         this.load();
     }

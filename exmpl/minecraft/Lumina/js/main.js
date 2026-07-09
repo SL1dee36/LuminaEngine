@@ -12,7 +12,7 @@ import { DayNightCycle } from '../../game/DayNightCycle.js';
 import { SaveManager } from '../../game/SaveManager.js';
 import { SettingsManager } from '../../game/SettingsManager.js';
 import { SoundManager } from '../../game/SoundManager.js';
-import { TouchControls } from './core/TouchControls.js';
+import { TouchControls } from '../../game/TouchControls.js';
 import { PlayerHand } from '../../game/PlayerHand.js';
 
 function main() {
@@ -118,7 +118,7 @@ function main() {
                 uiManager.toggleInventory();
             }
             if (e.code === 'Escape') {
-                if (engine.inputManager.isInventoryOpen) {
+                if (engine.inputManager.isUIOpen) {
                     uiManager.toggleInventory();
                 } else if (!engine.inputManager.isPointerLocked() && !engine.inputManager.isPaused) {
                     engine.inputManager.setPaused(true);

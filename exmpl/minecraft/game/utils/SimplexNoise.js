@@ -1,4 +1,7 @@
 // game/utils/SimplexNoise.js
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
+
 export class SimplexNoise {
     constructor(seed = Math.random()) {
         this.p = new Uint8Array(256);

@@ -1,5 +1,8 @@
+// Lumina/js/core/PhysicsEngine.js
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
+
 import { BoxCollider } from './Colliders.js';
-import { BLOCK } from '../../../game/blocks.js';
 import * as THREE from 'three';
 
 export class PhysicsEngine {
@@ -66,20 +69,17 @@ export class PhysicsEngine {
         const pos = body.physicsPosition;
         
         // --- ПРОВЕРКА НА ВОДУ ---
-        const headVoxel = this.world.getVoxel(Math.floor(pos.x), Math.floor(pos.y + 1.2), Math.floor(pos.z));
-        const legsVoxel = this.world.getVoxel(Math.floor(pos.x), Math.floor(pos.y), Math.floor(pos.z));
+        const isHeadWater = this.world.isWater(Math.floor(pos.x), Math.floor(pos.y + 1.2), Math.floor(pos.z));
+        const isLegsWater = this.world.isWater(Math.floor(pos.x), Math.floor(pos.y), Math.floor(pos.z));
         
-        body.isInWater = (headVoxel === BLOCK.WATER || legsVoxel === BLOCK.WATER);
+        body.isInWater = (isHeadWater || isLegsWater);
 
         if (body.isInWater) {
-            // Вязкость воды
             body.velocity.x *= 0.8;
             body.velocity.z *= 0.8;
             body.velocity.y *= 0.9; 
-            // Ослабленная гравитация (плавучесть)
             body.velocity.addScaledVector(this.gravity, dt * 0.2); 
         } else {
-            // Воздух
             body.velocity.x *= 0.92;
             body.velocity.z *= 0.92;
             body.velocity.addScaledVector(this.gravity, dt);
@@ -155,8 +155,9 @@ export class PhysicsEngine {
         const minZ = Math.floor(playerBox.min.z + 0.01), maxZ = Math.ceil(playerBox.max.z - 0.01);
 
         for (let y = minY; y < maxY; y++) for (let z = minZ; z < maxZ; z++) for (let x = minX; x < maxX; x++) {
-            const id = this.world.getVoxel(x, y, z);
-            if (BLOCK.get(id).isSolid) boxes.push(new THREE.Box3(new THREE.Vector3(x, y, z), new THREE.Vector3(x + 1, y + 1, z + 1)));
+            if (this.world.isSolid(x, y, z)) {
+                boxes.push(new THREE.Box3(new THREE.Vector3(x, y, z), new THREE.Vector3(x + 1, y + 1, z + 1)));
+            }
         }
         return boxes;
     }

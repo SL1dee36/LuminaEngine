@@ -1,3 +1,6 @@
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
+
 import * as THREE from 'three';
 import { BLOCK } from './blocks.js';
 import { GPUWorldGenerator } from './GPUWorldGenerator.js';
@@ -525,6 +528,11 @@ export class World {
     isSolid(x, y, z) {
         const v = this.getVoxel(x, y, z);
         return v !== BLOCK.AIR && BLOCK.get(v).isSolid;
+    }
+
+    isWater(x, y, z) {
+        const v = this.getVoxel(x, y, z);
+        return v === BLOCK.WATER;
     }
 
     setVoxel(x, y, z, v, meta = 0) {

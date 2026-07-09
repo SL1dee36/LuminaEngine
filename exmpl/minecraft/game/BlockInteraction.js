@@ -1,3 +1,6 @@
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
+
 import { Component } from '../Lumina/js/core/Component.js';
 import { Inventory } from './Inventory.js';
 import { BLOCK } from './blocks.js';
@@ -67,7 +70,7 @@ export class BlockInteraction extends Component {
     }
 
     update(deltaTime) {
-        if (this.engine.inputManager.isInventoryOpen || this.engine.inputManager.isPaused) {
+        if (this.engine.inputManager.isUIOpen || this.engine.inputManager.isPaused) {
              this.resetBreaking();
              return;
         }

@@ -1,3 +1,6 @@
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
+
 import * as THREE from 'three';
 
 export class TextureGenerator {

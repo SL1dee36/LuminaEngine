@@ -1,4 +1,6 @@
-// Lumina/js/physics/Colliders.js
+// Lumina/js/core/Collider.js
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
 
 import { Component } from '../core/Component.js';
 import * as THREE from 'three';

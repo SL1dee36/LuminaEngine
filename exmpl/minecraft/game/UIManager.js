@@ -1,3 +1,6 @@
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
+
 import { BLOCK } from './blocks.js';
 import { TextureGenerator } from './TextureGenerator.js';
 
@@ -72,12 +75,12 @@ export class UIManager {
         if(this.inputManager.isPaused) return;
         
         if (externalOpen) {
-            this.inputManager.isInventoryOpen = true;
+            this.inputManager.isUIOpen = true;
         } else {
-            this.inputManager.isInventoryOpen = !this.inputManager.isInventoryOpen;
+            this.inputManager.isUIOpen = !this.inputManager.isUIOpen;
         }
 
-        if(this.inputManager.isInventoryOpen){ 
+        if(this.inputManager.isUIOpen){ 
             this.inventoryElement.style.display = 'block'; 
             document.exitPointerLock(); 
             this.updateInventoryWindow(); 
@@ -121,7 +124,7 @@ export class UIManager {
         }); 
 
         document.addEventListener('touchmove', (e) => {
-            if(this.inputManager.isInventoryOpen && this.cursorItem) {
+            if(this.inputManager.isUIOpen && this.cursorItem) {
                  const t = e.touches[0];
                  updatePos(t.clientX, t.clientY);
             }
@@ -277,7 +280,7 @@ export class UIManager {
         }
 
         s.onmousedown = (e) => {
-            if(!this.inputManager.isInventoryOpen) return;
+            if(!this.inputManager.isUIOpen) return;
             e.preventDefault(); 
             e.stopPropagation();
             if(clickHandler) clickHandler(i, e.button === 2);
@@ -289,7 +292,7 @@ export class UIManager {
         };
 
         s.ontouchstart = (e) => {
-            if(!this.inputManager.isInventoryOpen) return;
+            if(!this.inputManager.isUIOpen) return;
             
             const touch = e.touches[0];
             this.touchStartX = touch.clientX;
@@ -304,7 +307,7 @@ export class UIManager {
         };
 
         s.ontouchend = (e) => {
-            if(!this.inputManager.isInventoryOpen) return;
+            if(!this.inputManager.isUIOpen) return;
             if (this.touchTimer) clearTimeout(this.touchTimer);
 
             const touch = e.changedTouches[0];
@@ -394,7 +397,7 @@ export class UIManager {
     updateAll() { 
         if(!this.inventoryComponent) return; 
         this.updateHotbarHUD(); 
-        if(this.inputManager.isInventoryOpen){
+        if(this.inputManager.isUIOpen){
             this.updateInventoryWindow();
             this.updateCursorIcon();
         } 

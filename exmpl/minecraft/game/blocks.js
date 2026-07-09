@@ -1,3 +1,6 @@
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
+
 export const BLOCK = {
     AIR: 0,
     BEDROCK: 1,

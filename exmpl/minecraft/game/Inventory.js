@@ -1,3 +1,6 @@
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
+
 import { Component } from '../Lumina/js/core/Component.js';
 import { BLOCK } from './blocks.js';
 import { RECIPES } from './Recipes.js';
@@ -42,11 +45,11 @@ export class Inventory extends Component {
             this.updateFurnaceLogic(this.blockEntities[key], deltaTime);
         }
 
-        if (this.activeContainerType === 'furnace' && this.uiManager.inputManager.isInventoryOpen) {
+        if (this.activeContainerType === 'furnace' && this.uiManager.inputManager.isUIOpen) {
              this.uiManager.updateInventoryWindow();
         }
 
-        if (!this.uiManager.isInventoryOpen) {
+        if (!this.uiManager.isUIOpen) {
             const scroll = this.engine.inputManager.getScrollDelta();
             if (scroll !== 0) {
                 this.selectedSlot = (this.selectedSlot + scroll + 9) % 9;

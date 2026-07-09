@@ -1,3 +1,6 @@
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
+
 import { BLOCK } from './blocks.js';
 
 export const RECIPES = {

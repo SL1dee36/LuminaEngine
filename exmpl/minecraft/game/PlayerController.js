@@ -1,3 +1,6 @@
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
+
 import { Component } from '../Lumina/js/core/Component.js';
 import { RigidBody } from '../Lumina/js/physics/RigidBody.js';
 import * as THREE from 'three';
@@ -23,6 +26,24 @@ export class PlayerController extends Component {
         this.camera.position.set(0, 0.8, 0);
     }
 
+    setRenderMode(mode) {
+        const world = this.engine.physicsEngine.world;
+        if (!world) return;
+        
+        const scene = this.engine.renderer.scene;
+        scene.overrideMaterial = null;
+
+        if (mode === 'wireframe') {
+            world.materials.forEach(m => m.wireframe = true);
+        } else if (mode === 'depth') {
+            world.materials.forEach(m => m.wireframe = false);
+            if (!this.depthMaterial) this.depthMaterial = new THREE.MeshDepthMaterial();
+            scene.overrideMaterial = this.depthMaterial;
+        } else {
+            world.materials.forEach(m => m.wireframe = false);
+        }
+    }
+
     update(deltaTime) {
         if (this.transform.position.y < -30) {
             const respawnPos = new THREE.Vector3(8, 120, 8);
@@ -34,27 +55,35 @@ export class PlayerController extends Component {
             this.rigidBody.velocity.set(0, 0, 0);
         }
 
+        const input = this.engine.inputManager;
+
+        if (input.wasKeyJustPressed('KeyU')) this.setRenderMode('wireframe');
+        if (input.wasKeyJustPressed('KeyI')) this.setRenderMode('depth');
+        if (input.wasKeyJustPressed('KeyO')) this.setRenderMode('normal');
+
         const sensitivity = this.settings.get('sensitivity');
-        const mouseDelta = this.engine.inputManager.getMouseDelta();
+        const mouseDelta = input.getMouseDelta();
         
         this.transform.rotateY(-mouseDelta.x * sensitivity);
         this.pitch -= mouseDelta.y * sensitivity;
         this.pitch = Math.max(-Math.PI/2 + 0.1, Math.min(Math.PI/2 - 0.1, this.pitch));
         this.camera.rotation.x = this.pitch;
 
-        const input = this.engine.inputManager;
         const dir = new THREE.Vector3();
+        const joyX = input.joystickInput ? input.joystickInput.x : 0;
+        const joyY = input.joystickInput ? input.joystickInput.y : 0;
 
-        if (input.isKeyDown('KeyW')) dir.z -= 1;
-        if (input.isKeyDown('KeyS')) dir.z += 1;
-        if (input.isKeyDown('KeyA')) dir.x -= 1;
-        if (input.isKeyDown('KeyD')) dir.x += 1;
+        if (input.isKeyDown('KeyW') || joyY < -0.3) dir.z -= 1;
+        if (input.isKeyDown('KeyS') || joyY > 0.3) dir.z += 1;
+        if (input.isKeyDown('KeyA') || joyX < -0.3) dir.x -= 1;
+        if (input.isKeyDown('KeyD') || joyX > 0.3) dir.x += 1;
 
         if (dir.lengthSq() > 0) {
             dir.normalize().applyQuaternion(this.transform.quaternion);
         }
 
-        const speed = input.isKeyDown('ShiftLeft') ? this.runSpeed : this.moveSpeed;
+        const isSprint = input.isKeyDown('ShiftLeft') || input.isSprintingMobile;
+        const speed = isSprint ? this.runSpeed : this.moveSpeed;
         
         if (this.rigidBody.isInWater) {
             this.rigidBody.velocity.x = dir.x * speed * 0.6;

@@ -1,7 +1,11 @@
+// Lumina/js/core/Renderer.js
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
+
 import * as THREE from 'three';
 
 export class Renderer {
-    constructor(canvasId) {
+    constructor(canvasId) { // default params
         this.canvas = document.getElementById(canvasId);
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -52,16 +56,15 @@ export class Renderer {
             Pitch: ${pitch}° Yaw: ${yawDisplay}°
         `;
 
-        if (worldStats && renderStats) {
-            // Estimate blocks by loaded chunks capacity
-            const totalBlocks = worldStats.chunks * 8 * 128 * 8; 
-            
-            statsHtml += `<br>
-            Loaded Chunks: ${worldStats.chunks}<br>
-            Total Capacity: ${totalBlocks.toLocaleString()} blocks<br>
-            Visible Tris: ${renderStats.triangles.toLocaleString()}<br>
-            Total Tris: ${worldStats.totalTriangles.toLocaleString()}
-            `;
+        if (renderStats) {
+            statsHtml += `<br>Visible Tris: ${renderStats.triangles.toLocaleString()}<br>`;
+        }
+
+        if (worldStats) {
+            for (const key in worldStats) {
+                const label = key.charAt(0).toUpperCase() + key.slice(1);
+                statsHtml += `${label}: ${worldStats[key].toLocaleString()}<br>`;
+            }
         }
 
         this.coordsDisplay.innerHTML = statsHtml;

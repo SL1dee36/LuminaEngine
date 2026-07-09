@@ -1,3 +1,6 @@
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
+
 import { Component } from '../Lumina/js/core/Component.js';
 import { BLOCK } from './blocks.js';
 import { Inventory } from './Inventory.js';
@@ -59,8 +62,9 @@ export class PlayerHand extends Component {
 
         // --- Logic for Animations ---
         // 1. Break / Hit Animation
-        // Check if user is holding button OR if BlockInteraction is actively breaking
-        const isBreaking = this.engine.inputManager.isMouseButtonDown(0);
+        // Check if user is holding button AND ui is closed
+        const isUIOpen = this.engine.inputManager.isUIOpen || this.engine.inputManager.isPaused;
+        const isBreaking = this.engine.inputManager.isMouseButtonDown(0) && !isUIOpen;
         
         if (isBreaking) {
             // Loop swing while holding
@@ -71,7 +75,7 @@ export class PlayerHand extends Component {
         }
 
         // 2. Place Animation
-        if (this.engine.inputManager.wasMouseButtonJustPressed(2)) {
+        if (this.engine.inputManager.wasMouseButtonJustPressed(2) && !isUIOpen) {
             this.isPlace = true;
             this.placeProgress = 0;
         }

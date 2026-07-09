@@ -1,3 +1,6 @@
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
+
 export class SoundManager {
     constructor(settingsManager) {
         this.settings = settingsManager;

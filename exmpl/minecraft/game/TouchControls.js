@@ -1,4 +1,6 @@
 // Lumina/js/core/TouchControls.js
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
 
 export class TouchControls {
     constructor(inputManager, uiManager) {
