@@ -1,4 +1,6 @@
-// Lumina/js/core/GameObject.js
+// /core/GameObject.js
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
 
 import * as THREE from 'three';
 

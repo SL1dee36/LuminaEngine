@@ -1,3 +1,7 @@
+// core/Component.js
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
+
 export class Component {
     constructor(gameObject) {
         this.gameObject = gameObject;

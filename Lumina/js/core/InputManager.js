@@ -1,4 +1,6 @@
-// Lumina/js/core/InputManager.js
+// core/InputManager.js
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
 
 export class InputManager {
     constructor(targetElement) {

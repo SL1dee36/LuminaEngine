@@ -1,4 +1,7 @@
-// Lumina/js/physics/RigidBody.js
+// physics/RigidBody.js
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
+
 import { Component } from '../core/Component.js';
 import * as THREE from 'three';
 
@@ -9,13 +12,11 @@ export class RigidBody extends Component {
         this.velocity = new THREE.Vector3();
         this.isGrounded = false;
         
-        // Добавляем поля для интерполяции
         this.physicsPosition = null; 
         this.prevPhysicsPosition = null;
     }
 
     start() {
-        // Инициализируем позиции при старте
         this.physicsPosition = this.transform.position.clone();
         this.prevPhysicsPosition = this.transform.position.clone();
         

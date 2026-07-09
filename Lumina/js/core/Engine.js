@@ -1,108 +1,85 @@
-// Lumina/js/core/Engine.js
+// core/Engine.js
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
 
-import { Renderer } from './Renderer.js';
-import { InputManager } from './InputManager.js';
-import { PhysicsEngine } from '../physics/PhysicsEngine.js';
 import * as THREE from 'three';
+import Renderer from './Renderer.js';
+import PhysicsEngine from '../physics/PhysicsEngine.js';
+import InputManager from './InputManager.js';
 
-export class Engine {
+export default class Engine {
     constructor(canvasId) {
         this.renderer = new Renderer(canvasId);
-        this.inputManager = new InputManager(this.renderer.domElement);
         this.physicsEngine = new PhysicsEngine();
-        this.gameObjects = [];
-        this.player = null;
+        this.inputManager = new InputManager();
         
-        this.lastTime = 0;
-        this.fps = 0;
-        this.frameCount = 0;
-        this.fpsLastUpdate = 0;
-
-        // Cache for debug material
-        this.depthMaterial = new THREE.MeshDepthMaterial();
-    }
-    
-    setPlayer(gameObject) {
-        this.player = gameObject;
+        this.gameObjects = [];
+        this.lastTime = performance.now();
+        this.isRunning = false;
     }
 
     addGameObject(gameObject) {
         this.gameObjects.push(gameObject);
-        this.renderer.scene.add(gameObject.transform);
-        gameObject.engine = this;
+        
+        if (gameObject.mesh) {
+            this.renderer.scene.add(gameObject.mesh);
+        }
+        
+        if (gameObject.rigidBody) {
+            this.physicsEngine.addRigidBody(gameObject.rigidBody);
+        }
+
+        if (gameObject.components) {
+            gameObject.components.forEach(comp => {
+                if (comp.start) comp.start();
+            });
+        }
+    }
+
+    removeGameObject(gameObject) {
+        const index = this.gameObjects.indexOf(gameObject);
+        if (index > -1) {
+            this.gameObjects.splice(index, 1);
+            
+            if (gameObject.mesh) {
+                this.renderer.scene.remove(gameObject.mesh);
+            }
+            if (gameObject.rigidBody) {
+                this.physicsEngine.removeRigidBody(gameObject.rigidBody);
+            }
+        }
+    }
+
+    setRenderMode(wireframeEnabled) {
+        this.renderer.scene.traverse((child) => {
+            if (child.isMesh && child.material) {
+                child.material.wireframe = wireframeEnabled;
+            }
+        });
     }
 
     start() {
-        this.gameObjects.forEach(go => go.start());
-        this.lastTime = performance.now();
-        this.fpsLastUpdate = this.lastTime;
+        if (this.isRunning) return;
+        this.isRunning = true;
         this.gameLoop();
     }
 
-    setRenderMode(mode) {
-        // Проверяем, загружен ли мир
-        if (!this.physicsEngine.world) return;
-        const worldMaterials = this.physicsEngine.world.materials;
-        const scene = this.renderer.scene;
-
-        // Сброс глобального оверрайда (для карты глубины)
-        scene.overrideMaterial = null;
-
-        if (mode === 'wireframe') {
-            // Включаем сетку на всех материалах блоков
-            worldMaterials.forEach(m => m.wireframe = true);
-            console.log("Render Mode: Wireframe");
-        } 
-        else if (mode === 'depth') {
-            // Выключаем сетку, чтобы не мешала
-            worldMaterials.forEach(m => m.wireframe = false);
-            // Включаем глобальный материал глубины
-            scene.overrideMaterial = this.depthMaterial;
-            console.log("Render Mode: Depth Map");
-        } 
-        else {
-            // Normal / Original
-            worldMaterials.forEach(m => m.wireframe = false);
-            console.log("Render Mode: Original");
-        }
+    stop() {
+        this.isRunning = false;
     }
 
-    gameLoop(currentTime = 0) {
+    gameLoop() {
+        if (!this.isRunning) return;
+
+        requestAnimationFrame(() => this.gameLoop());
+
+        const currentTime = performance.now();
         const deltaTime = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
 
-        this.frameCount++;
-        if (currentTime > this.fpsLastUpdate + 1000) {
-            this.fps = this.frameCount;
-            this.frameCount = 0;
-            this.fpsLastUpdate = currentTime;
-        }
-        
-        // --- DEBUG KEYS ---
-        if (this.inputManager.wasKeyJustPressed('KeyU')) {
-            this.setRenderMode('wireframe');
-        }
-        if (this.inputManager.wasKeyJustPressed('KeyI')) {
-            this.setRenderMode('depth');
-        }
-        if (this.inputManager.wasKeyJustPressed('KeyO')) {
-            this.setRenderMode('normal');
-        }
-        // ------------------
-
+        this.inputManager.update();
         this.physicsEngine.update(deltaTime);
-        this.gameObjects.forEach(go => go.update(deltaTime));
+        this.gameObjects.forEach(obj => obj.update(deltaTime));
         this.renderer.render();
-
-        let worldStats = null;
-        if (this.physicsEngine.world) {
-            worldStats = this.physicsEngine.world.getStats();
-        }
-        const renderStats = this.renderer.renderer.info.render;
-
-        this.renderer.updateUI(this.fps, this.player ? this.player.transform : null, worldStats, renderStats);
-        
-        this.inputManager.lateUpdate();
-        requestAnimationFrame(this.gameLoop.bind(this));
     }
 }

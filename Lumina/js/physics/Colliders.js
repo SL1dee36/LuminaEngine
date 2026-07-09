@@ -1,4 +1,6 @@
-// Lumina/js/physics/Colliders.js
+// physics/Colliders.js
+// author: Nazaryan A.K. 
+// github: @Sl1dee36
 
 import { Component } from '../core/Component.js';
 import * as THREE from 'three';
@@ -20,7 +22,6 @@ export class BoxCollider extends Collider {
     }
 }
 
-// --- НОВЫЙ КОЛЛАЙДЕР ДЛЯ ЛАНДШАФТА ---
 export class HeightfieldCollider extends Collider {
     constructor(gameObject, geometry, segmentsX, segmentsZ) {
         super(gameObject);
