@@ -160,3 +160,5 @@ export class InputManager {
         this.resetDeltas();
     }
 }
+
+export default InputManager;

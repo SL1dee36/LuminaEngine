@@ -39,37 +39,39 @@ export class TouchControls {
     }
 
     init() {
-        // --- Joystick Logic (unchanged) ---
-        this.joystickZone.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const touch = e.changedTouches[0];
-            this.touchId = touch.identifier;
-            this.origin = { x: touch.clientX, y: touch.clientY };
-            this.updateJoystick(touch.clientX, touch.clientY);
-        }, { passive: false });
+        // --- Joystick Logic ---
+        if (this.joystickZone) {
+            this.joystickZone.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.changedTouches[0];
+                this.touchId = touch.identifier;
+                this.origin = { x: touch.clientX, y: touch.clientY };
+                this.updateJoystick(touch.clientX, touch.clientY);
+            }, { passive: false });
 
-        this.joystickZone.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            for (let i = 0; i < e.changedTouches.length; i++) {
-                if (e.changedTouches[i].identifier === this.touchId) {
-                    const touch = e.changedTouches[i];
-                    this.updateJoystick(touch.clientX, touch.clientY);
-                    break;
+            this.joystickZone.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === this.touchId) {
+                        const touch = e.changedTouches[i];
+                        this.updateJoystick(touch.clientX, touch.clientY);
+                        break;
+                    }
                 }
-            }
-        }, { passive: false });
+            }, { passive: false });
 
-        const endJoystick = (e) => {
-            for (let i = 0; i < e.changedTouches.length; i++) {
-                if (e.changedTouches[i].identifier === this.touchId) {
-                    this.touchId = null;
-                    this.resetJoystick();
-                    break;
+            const endJoystick = (e) => {
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === this.touchId) {
+                        this.touchId = null;
+                        this.resetJoystick();
+                        break;
+                    }
                 }
-            }
-        };
-        this.joystickZone.addEventListener('touchend', endJoystick);
-        this.joystickZone.addEventListener('touchcancel', endJoystick);
+            };
+            this.joystickZone.addEventListener('touchend', endJoystick);
+            this.joystickZone.addEventListener('touchcancel', endJoystick);
+        }
 
         // --- Interaction Logic (Break/Place) ---
         document.addEventListener('touchstart', (e) => {
@@ -91,7 +93,6 @@ export class TouchControls {
                 this.interactionTimer = setTimeout(() => {
                     if (!this.isDrag) {
                         this.isBreaking = true;
-                        // Task 5: Удерживаем кнопку ломания
                         this.inputManager.emulateMouseHold(0, true); 
                         if (navigator.vibrate) navigator.vibrate(30);
                     }
@@ -154,24 +155,34 @@ export class TouchControls {
         
         // Sprint logic
         const btnRun = document.getElementById('btn-run');
-        btnRun.addEventListener('touchstart', (e) => { 
-            e.preventDefault(); e.stopPropagation();
-            this.inputManager.setMobileSprint(true);
-            btnRun.classList.add('active');
-        });
-        btnRun.addEventListener('touchend', (e) => { 
-            e.preventDefault(); e.stopPropagation();
-            this.inputManager.setMobileSprint(false);
-            btnRun.classList.remove('active');
-        });
+        if (btnRun) {
+            btnRun.addEventListener('touchstart', (e) => { 
+                e.preventDefault(); e.stopPropagation();
+                this.inputManager.setMobileSprint(true);
+                btnRun.classList.add('active');
+            });
+            btnRun.addEventListener('touchend', (e) => { 
+                e.preventDefault(); e.stopPropagation();
+                this.inputManager.setMobileSprint(false);
+                btnRun.classList.remove('active');
+            });
+        }
 
         // UI toggles
-        document.getElementById('btn-inv-mobile').addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); this.uiManager.toggleInventory(); });
-        document.getElementById('btn-pause-mobile').addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); this.inputManager.setPaused(true); });
+        const btnInv = document.getElementById('btn-inv-mobile');
+        if (btnInv && this.uiManager && typeof this.uiManager.toggleInventory === 'function') {
+            btnInv.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); this.uiManager.toggleInventory(); });
+        }
+        
+        const btnPause = document.getElementById('btn-pause-mobile');
+        if (btnPause) {
+            btnPause.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); this.inputManager.setPaused(true); });
+        }
     }
 
     bindButton(id, key) {
         const btn = document.getElementById(id);
+        if (!btn) return;
         btn.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); this.inputManager.emulateKey(key, true); btn.classList.add('active'); });
         btn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); this.inputManager.emulateKey(key, false); btn.classList.remove('active'); });
     }
@@ -185,12 +196,18 @@ export class TouchControls {
             dx = (dx / dist) * maxRadius;
             dy = (dy / dist) * maxRadius;
         }
-        this.joystickKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+        if (this.joystickKnob) {
+            this.joystickKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+        }
         this.inputManager.setJoystickInput(dx / maxRadius, dy / maxRadius);
     }
 
     resetJoystick() {
-        this.joystickKnob.style.transform = `translate(-50%, -50%)`;
+        if (this.joystickKnob) {
+            this.joystickKnob.style.transform = `translate(-50%, -50%)`;
+        }
         this.inputManager.setJoystickInput(0, 0);
     }
 }
+
+export default TouchControls;

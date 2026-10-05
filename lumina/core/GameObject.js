@@ -34,3 +34,5 @@ export class GameObject {
         this.components.forEach(c => c.update(deltaTime));
     }
 }
+
+export default GameObject;

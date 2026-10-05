@@ -17,3 +17,5 @@ export class Component {
         // Переопределяется в дочерних классах
     }
 }
+
+export default Component;

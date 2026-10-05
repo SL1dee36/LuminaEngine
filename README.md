@@ -1,101 +1,168 @@
 # LuminaEngine
 
-LuminaEngine — это 3D-игровой движок, построенный поверх Three.js. Движок использует паттерн Entity-Component-System (ECS) для управления игровой логикой и включает в себя встроенные модули для рендеринга, обработки физики и управления пользовательским вводом.
+LuminaEngine — легковесный трехмерный игровой движок для веб-платформы, функционирующий поверх Three.js. Движок реализует компонентную архитектуру (Entity-Component), дискретную физическую симуляцию на базе AABB-коллайдеров и централизованную подсистему обработки пользовательского ввода для настольных и мобильных браузеров.
 
-## Основные возможности
+## Технические характеристики
 
-* **Архитектура ECS**: Гибкая система игровых объектов (`GameObject`) и компонентов, позволяющая легко расширять функционал.
-* **Рендеринг**: Интеграция с Three.js с поддержкой теней и различных режимов отображения (включая wireframe и depth map).
-* **Физика**: Встроенный физический движок с поддержкой твердых тел (`RigidBody`) и коллайдеров.
-* **Ввод**: Обработка событий клавиатуры, мыши и сенсорных экранов (`InputManager`, `TouchControls`).
-* **Модульность**: Разделение на ядро, физику и игровую логику.
+* Версия ядра: 1.4.1.
+* Базовая графическая библиотека: Three.js (r160+).
+* Архитектурный паттерн: Entity-Component-System (контейнерная модель `GameObject` + `Component`).
+* Подсистема рендеринга: WebGLRenderer с поддержкой теней (PCFSoftShadowMap), автоматической адаптацией под плотность пикселей (`devicePixelRatio`) и ресайзом вьюпорта.
+* Физический движок: дискретная интеграция Эйлера, AABB-коллизии по трем пространственным осям (X, Y, Z), поддержка гравитации, трения скольжения и коэффициента упругости (restitution).
+* Подсистема ввода: Pointer Lock API, обработка клавиатуры, мыши, колеса прокрутки, сенсорных жестов и виртуального экранного джойстика.
+* Модульная система: нативные ECMAScript-модули (ESM).
 
-## Быстрый старт и примеры API
-
-Ниже приведены базовые примеры использования ядра движка. Полная и подробная документация находится в стадии разработки.
-
-### 1. Инициализация движка
-
-Для начала работы необходимо создать экземпляр класса `Engine`, передав ему ID HTML-элемента canvas.
-
-```javascript
-import { Engine } from './js/core/Engine.js';
-
-// Инициализация движка с привязкой к элементу <canvas id="game-canvas"></canvas>
-const engine = new Engine('game-canvas');
+## Структура репозитория
 
 ```
-
-### 2. Создание игровых объектов и компонентов
-
-Вся логика строится вокруг экземпляров `GameObject`. Поведение объектов определяется добавленными к ним компонентами.
-
-```javascript
-import { GameObject } from './js/core/GameObject.js';
-import { RigidBody } from './js/physics/RigidBody.js';
-import { BoxCollider } from './js/physics/Colliders.js';
-
-// Создание нового игрового объекта
-const player = new GameObject('Player');
-
-// Добавление компонентов. 
-// Метод addComponent принимает класс компонента и любые дополнительные аргументы для его конструктора.
-player.addComponent(RigidBody, { bodyType: 'dynamic' });
-player.addComponent(BoxCollider, new THREE.Vector3(0.6, 1.8, 0.6));
-
-// Установка позиции через встроенный transform (Three.js Object3D)
-player.transform.position.set(0, 10, 0);
-
+LuminaEngine/
+├── lumina/
+│   ├── index.js                  Точка входа библиотеки (экспорт всех модулей)
+│   ├── lu.version                Файл версии ядра
+│   ├── main.js                   Пример программной сборки сцены
+│   ├── core/
+│   │   ├── Component.js          Базовый класс компонентов
+│   │   ├── Engine.js             Главный класс управления жизненным циклом и циклом рендера
+│   │   ├── GameObject.js         Сущность сцены (контейнер компонентов и пространственных данных)
+│   │   ├── InputManager.js       Централизованный диспетчер ввода (мышь, клавиатура, касания)
+│   │   ├── Renderer.js           Обертка WebGL-контекста Three.js, камеры и сцены
+│   │   └── TouchControls.js      Обработчик мобильного ввода и виртуального джойстика
+│   └── physics/
+│       ├── Colliders.js          Коллайдеры (BoxCollider, HeightfieldCollider)
+│       ├── PhysicsEngine.js      Дискретный симулятор физики и столкновений
+│       └── RigidBody.js          Компонент твердого тела
+├── exmpl/
+│   ├── basic/                    Минималистичный базовый пример работы движка
+│   │   ├── index.html
+│   │   └── main.js
+│   └── minecraft/                Комплексный демонстрационный проект воксельной песочницы
+│       ├── index.html
+│       ├── game/
+│       └── Lumina/
+├── README.md                     Основное описание проекта
+├── doc_ru.md                     Полная техническая спецификация API
+└── .hintrc                       Конфигурация линтера
 ```
 
-### 3. Создание пользовательского компонента
+## Быстрый старт
 
-Вы можете создавать свои компоненты, расширяя базовый функционал. Каждый компонент имеет доступ к объекту, к которому он прикреплен, и к жизненному циклу (`start`, `update`).
+### 1. Подключение разметки HTML
+
+Для функционирования движка требуется элемент `<canvas>` и карта импортов (importmap) для Three.js.
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuminaEngine App</title>
+    <style>
+        body, html { margin: 0; padding: 0; overflow: hidden; width: 100%; height: 100%; }
+        #gameCanvas { width: 100%; height: 100%; display: block; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
+```
+
+### 2. Инициализация и создание сцены
 
 ```javascript
-export class CustomPlayerController {
-    constructor(gameObject, speed) {
-        this.gameObject = gameObject;
+import * as THREE from 'three';
+import { Engine, GameObject, BoxCollider, RigidBody, Component } from './lumina/index.js';
+
+// 1. Инициализация ядра движка
+const engine = new Engine('gameCanvas');
+
+// 2. Настройка освещения
+const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+engine.renderer.scene.add(ambient);
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(10, 20, 10);
+dirLight.castShadow = true;
+engine.renderer.scene.add(dirLight);
+
+// 3. Создание статической поверхности
+const floor = new GameObject('Floor');
+const floorMesh = new THREE.Mesh(
+    new THREE.BoxGeometry(20, 1, 20),
+    new THREE.MeshStandardMaterial({ color: 0x444444 })
+);
+floorMesh.receiveShadow = true;
+floor.transform.add(floorMesh);
+floor.transform.position.set(0, -0.5, 0);
+floor.addComponent(BoxCollider, new THREE.Vector3(20, 1, 20));
+floor.addComponent(RigidBody, { bodyType: 'static' });
+engine.addGameObject(floor);
+
+// 4. Создание динамического физического объекта
+const box = new GameObject('Box');
+const boxMesh = new THREE.Mesh(
+    new THREE.BoxGeometry(1.5, 1.5, 1.5),
+    new THREE.MeshStandardMaterial({ color: 0x2980b9 })
+);
+boxMesh.castShadow = true;
+box.transform.add(boxMesh);
+box.transform.position.set(0, 8, 0);
+box.addComponent(BoxCollider, new THREE.Vector3(1.5, 1.5, 1.5));
+box.addComponent(RigidBody, {
+    bodyType: 'dynamic',
+    friction: 0.2,
+    restitution: 0.3,
+    useGravity: true
+});
+engine.addGameObject(box);
+
+// 5. Позиционирование камеры и запуск цикла
+engine.renderer.camera.position.set(0, 6, 12);
+engine.renderer.camera.lookAt(0, 1, 0);
+engine.start();
+```
+
+### 3. Разработка пользовательского компонента
+
+Каждый компонент наследуется от базового класса `Component` и реализует методы жизненного цикла `start()` и `update(deltaTime)`:
+
+```javascript
+class MoverComponent extends Component {
+    constructor(gameObject, speed = 5.0) {
+        super(gameObject);
         this.speed = speed;
     }
 
     start() {
-        // Вызывается один раз при старте
-        console.log(`${this.gameObject.name} initialized with speed ${this.speed}`);
+        // Вызывается однократно при регистрации объекта в движке
     }
 
     update(deltaTime) {
-        // Вызывается каждый кадр
-        // Пример использования менеджера ввода из движка:
-        if (this.gameObject.engine.inputManager.isKeyPressed('KeyW')) {
-            this.gameObject.transform.position.z -= this.speed * deltaTime;
+        // Вызывается на каждом кадре перед рендером
+        const input = this.engine.inputManager;
+        if (input.isKeyDown('KeyW')) {
+            this.transform.position.z -= this.speed * deltaTime;
+        }
+        if (input.isKeyDown('KeyS')) {
+            this.transform.position.z += this.speed * deltaTime;
         }
     }
 }
 
-// Добавление пользовательского компонента
-player.addComponent(CustomPlayerController, 5.0);
-
-```
-
-### 4. Запуск игрового цикла
-
-После настройки всех объектов, их необходимо добавить в движок и запустить главный цикл.
-
-```javascript
-// Добавление объекта в массив обрабатываемых сущностей и на сцену
-engine.addGameObject(player);
-
-// Опционально: установка объекта в качестве главного игрока
-engine.setPlayer(player);
-
-// Запуск игрового цикла (gameLoop)
-engine.start();
-
+box.addComponent(MoverComponent, 4.0);
 ```
 
 ## Документация
 
-Упрощенная документация на Русском языке: [ Открыть техническую документацию ](https://github.com/SL1dee36/LuminaEngine/blob/main/doc_ru.md)
-
-*Полноценная документация по классам, физическому движку, генерации мира и другим подсистемам находится в разработке и будет добавлена позже.*
+Подробная техническая спецификация архитектуры, всех классов, методов, типов данных и жизненного цикла доступна в файле [doc_ru.md](doc_ru.md).

@@ -4,7 +4,7 @@
 
 import * as THREE from 'three';
 
-export default class PhysicsEngine {
+export class PhysicsEngine {
     constructor() {
         this.rigidBodies = [];
         this.gravity = -20.0;
@@ -62,10 +62,27 @@ export default class PhysicsEngine {
                 body.position.x = nextPosX.x;
             }
 
-            // Friction
+            // Z
+            const nextPosZ = body.position.clone();
+            nextPosZ.z += body.velocity.z * deltaTime;
+
+            const colsZ = this.getCollisions(body, nextPosZ);
+            if (colsZ.length > 0) {
+                if (body.restitution > 0) body.velocity.z *= -body.restitution;
+                else body.velocity.z = 0;
+
+                body.handleCollisions(colsZ, 'Z');
+            } else {
+                body.position.z = nextPosZ.z;
+            }
+
+            // Friction (трение применяется по осям X и Z при контакте с поверхностью)
             if (body.isGrounded && body.friction > 0) {
-                body.velocity.x *= Math.pow(1 - body.friction, deltaTime * 60);
+                const frictionFactor = Math.pow(1 - body.friction, deltaTime * 60);
+                body.velocity.x *= frictionFactor;
+                body.velocity.z *= frictionFactor;
                 if (Math.abs(body.velocity.x) < 0.05) body.velocity.x = 0;
+                if (Math.abs(body.velocity.z) < 0.05) body.velocity.z = 0;
             }
         });
     }
@@ -91,3 +108,5 @@ export default class PhysicsEngine {
         return collisions;
     }
 }
+
+export default PhysicsEngine;

@@ -4,13 +4,18 @@
 
 import * as THREE from 'three';
 
-export default class Renderer {
+export class Renderer {
     constructor(canvasId) {
-        const canvas = document.getElementById(canvasId);
+        const canvas = typeof canvasId === 'string' ? document.getElementById(canvasId) : canvasId;
+        if (!canvas) {
+            throw new Error(`Renderer: Canvas element with ID "${canvasId}" not found in DOM.`);
+        }
+
         this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.shadowMap.enabled = true;
+        this.domElement = this.renderer.domElement;
 
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -28,3 +33,5 @@ export default class Renderer {
         this.renderer.render(this.scene, this.camera);
     }
 }
+
+export default Renderer;

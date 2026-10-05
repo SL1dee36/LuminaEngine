@@ -7,23 +7,29 @@ import Renderer from './Renderer.js';
 import PhysicsEngine from '../physics/PhysicsEngine.js';
 import { InputManager } from './InputManager.js';
 
-export default class Engine {
+export class Engine {
     constructor(canvasId) {
         this.renderer = new Renderer(canvasId);
         this.physicsEngine = new PhysicsEngine();
         this.inputManager = new InputManager(this.renderer.renderer.domElement);
         
         this.gameObjects = [];
+        this.player = null;
         this.lastTime = performance.now();
         this.isRunning = false;
     }
 
+    setPlayer(gameObject) {
+        this.player = gameObject;
+    }
+
     addGameObject(gameObject) {
         gameObject.engine = this;
-        
         this.gameObjects.push(gameObject);
         
-        if (gameObject.mesh) {
+        if (gameObject.transform) {
+            this.renderer.scene.add(gameObject.transform);
+        } else if (gameObject.mesh) {
             this.renderer.scene.add(gameObject.mesh);
         }
         
@@ -31,15 +37,17 @@ export default class Engine {
             this.physicsEngine.addRigidBody(gameObject.rigidBody);
         }
         gameObject.start();
+        return gameObject;
     }
-
 
     removeGameObject(gameObject) {
         const index = this.gameObjects.indexOf(gameObject);
         if (index > -1) {
             this.gameObjects.splice(index, 1);
             
-            if (gameObject.mesh) {
+            if (gameObject.transform) {
+                this.renderer.scene.remove(gameObject.transform);
+            } else if (gameObject.mesh) {
                 this.renderer.scene.remove(gameObject.mesh);
             }
             if (gameObject.rigidBody) {
@@ -59,6 +67,7 @@ export default class Engine {
     start() {
         if (this.isRunning) return;
         this.isRunning = true;
+        this.lastTime = performance.now();
         this.gameLoop();
     }
 
@@ -72,8 +81,11 @@ export default class Engine {
         requestAnimationFrame(() => this.gameLoop());
 
         const currentTime = performance.now();
-        const deltaTime = (currentTime - this.lastTime) / 1000;
+        let deltaTime = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
+
+        // Предотвращение скачков дельты при неактивной вкладке
+        if (deltaTime > 0.1) deltaTime = 0.1;
 
         this.physicsEngine.update(deltaTime);
         this.gameObjects.forEach(obj => obj.update(deltaTime));
@@ -81,3 +93,5 @@ export default class Engine {
         this.inputManager.lateUpdate(); 
     }
 }
+
+export default Engine;

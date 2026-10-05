@@ -1,24 +1,58 @@
-// main.js
+// lumina/main.js
+// Example entry point and quick demonstration for LuminaEngine
 // author: Nazaryan A.K. 
 // github: @Sl1dee36
 
-import Engine from './core/Engine.js';
-import GameObject from './core/GameObject.js';
+import { Engine, GameObject, BoxCollider, RigidBody } from './index.js';
+import * as THREE from 'three';
 
-// 1. Инициализация движка
-// Для начала работы необходимо создать экземпляр класса Engine, передав ему ID HTML-элемента canvas[cite: 167].
-const engine = new Engine('gameCanvas');
+export function createDemoScene(canvasId = 'gameCanvas') {
+    const engine = new Engine(canvasId);
 
-// 2. Создание игровых объектов и компонентов
-// Вся логика строится вокруг экземпляров GameObject, а поведение определяется компонентами[cite: 168].
-// Пример того, как разработчик будет добавлять свои объекты:
+    // Освещение сцены
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    engine.renderer.scene.add(ambientLight);
 
-/*
-const myObject = new GameObject('Player');
-myObject.addComponent(new MyCustomComponent());
-engine.addGameObject(myObject);
-*/
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(20, 40, 20);
+    dirLight.castShadow = true;
+    engine.renderer.scene.add(dirLight);
 
-// 3. Запуск игрового цикла
-// После настройки всех объектов, запускаем главный цикл[cite: 171].
-engine.start();
+    // Пол (статический коллайдер)
+    const floor = new GameObject('Floor');
+    const floorGeo = new THREE.BoxGeometry(30, 1, 30);
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x4a4a4a });
+    const floorMesh = new THREE.Mesh(floorGeo, floorMat);
+    floorMesh.receiveShadow = true;
+    floor.transform.add(floorMesh);
+    floor.transform.position.set(0, -0.5, 0);
+    floor.addComponent(BoxCollider, new THREE.Vector3(30, 1, 30));
+    floor.addComponent(RigidBody, { bodyType: 'static' });
+    engine.addGameObject(floor);
+
+    // Физический куб (динамическое тело с гравитацией и упругостью)
+    const box = new GameObject('PhysicsBox');
+    const boxGeo = new THREE.BoxGeometry(2, 2, 2);
+    const boxMat = new THREE.MeshStandardMaterial({ color: 0x2980b9 });
+    const boxMesh = new THREE.Mesh(boxGeo, boxMat);
+    boxMesh.castShadow = true;
+    box.transform.add(boxMesh);
+    box.transform.position.set(0, 10, 0);
+    box.addComponent(BoxCollider, new THREE.Vector3(2, 2, 2));
+    box.addComponent(RigidBody, { 
+        bodyType: 'dynamic', 
+        friction: 0.2, 
+        restitution: 0.4, 
+        useGravity: true 
+    });
+    engine.addGameObject(box);
+
+    // Положение камеры
+    engine.renderer.camera.position.set(0, 8, 20);
+    engine.renderer.camera.lookAt(0, 2, 0);
+
+    engine.start();
+    return engine;
+}
+
+export default createDemoScene;
